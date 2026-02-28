@@ -1,0 +1,74 @@
+language: fr
+
+intents:
+  TodoDueAddItem:
+    data:
+      - sentences:
+          # Absolute time
+          - <rappel> [(de |d')]<item> (à|a) {due_hour}<heure>
+          - <rappel> [(de |d')]<item> (à|a) {due_hour}h{due_minute}
+          - <rappel> [(de |d')]<item> pour {due_day}
+          - <rappel> [(de |d')]<item> pour {due_day} (à|a) {due_hour}<heure>
+          - <rappel> [(de |d')]<item> pour {due_day} (à|a) {due_hour}h{due_minute}
+
+          # Relative time
+          - <rappel> [(de |d')]<item> dans {due_minute_offset}<minute>
+          - <rappel> [(de |d')]<item> dans {due_hour_offset}<heure>
+          - <rappel> [(de |d')]<item> dans {due_day_offset}<jour>
+
+        expansion_rules:
+          item: "{shopping_list_item:item}"
+          rappel: "(rappel|rapelle moi|me rapeler)"
+          minute: "(min| minute| minutes)"
+          heure: "(h| heure| heures)"
+          jour: "( jour| jours)"
+        slots:
+          domain: todo
+          name: tâches
+
+responses:
+  intents:
+    TodoDueAddItem:
+      default: "{{ slots.item }} ajouté"
+
+lists:
+  due_hour:
+    range:
+      from: 0
+      to: 23
+  due_minute:
+    range:
+      from: 0
+      to: 59
+  due_day:
+    values:
+      - in: maintenant
+        out: today
+      - in: demain
+        out: tomorrow
+      - in: lundi
+        out: mon
+      - in: mardi
+        out: tue
+      - in: mercredi
+        out: wed
+      - in: jeudi
+        out: thu
+      - in: vendredi
+        out: fri
+      - in: samedi
+        out: sat
+      - in: dimanche
+        out: sun
+  due_minute_offset:
+    range:
+      from: 0
+      to: 59
+  due_hour_offset:
+    range:
+      from: 1
+      to: 100
+  due_day_offset:
+    range:
+      from: 1
+      to: 30

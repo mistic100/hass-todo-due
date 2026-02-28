@@ -1,0 +1,86 @@
+language: en
+
+intents:
+  TodoDueAddItem:
+    data:
+      - sentences:
+          # Absolute time
+          - Remind [me] [to] <item> at {due_hour}
+          - Remind [me] [to] <item> at {due_hour}:{due_minute}
+          - Remind [me] [to] <item> for {due_day}
+          - Remind [me] [to] <item> for {due_day} at {due_hour}
+          - Remind [me] [to] <item> for {due_day} at {due_hour}:{due_minute}
+          
+          # Absolute time - AM/PM variants
+          - Remind [me] [to] <item> at {due_hour} {mode}
+          - Remind [me] [to] <item> at {due_hour}:{due_minute} {mode}
+          - Remind [me] [to] <item> for {due_day} at {due_hour} {mode}
+          - Remind [me] [to] <item> for {due_day} at {due_hour}:{due_minute} {mode}
+          
+          # Relative time
+          - Remind [me] [to] <item> in {due_minute_offset} (minute|minutes)
+          - Remind [me] [to] <item> in {due_hour_offset} (hour|hours)
+          - Remind [me] [to] <item> in {due_day_offset} (day|days)
+
+        expansion_rules:
+          item: "{todo_list_item:item}"
+        slots:
+          domain: todo
+          name: tasks
+          
+responses:
+  intents:
+    TodoDueAddItem:
+      default: "Added {{ slots.item }}"
+      
+lists:
+  mode:
+    values:
+      - in: am
+        out: am
+      - in: "a.m"
+        out: am
+      - in: pm
+        out: pm
+      - in: "p.m"
+        out: pm
+  due_hour:
+    range:
+      from: 0
+      to: 23
+  due_minute:
+    range:
+      from: 0
+      to: 59
+  due_day:
+    values:
+      - in: today
+        out: today
+      - in: tomorrow
+        out: tomorrow
+      - in: monday
+        out: mon
+      - in: tuesday
+        out: tue
+      - in: wednesday
+        out: wed
+      - in: thursday
+        out: thu
+      - in: friday
+        out: fri
+      - in: saturday
+        out: sat
+      - in: sunday
+        out: sun
+  due_minute_offset:
+    range:
+      from: 1
+      to: 59
+  due_hour_offset:
+    range:
+      from: 1
+      to: 100
+  due_day_offset:
+    range:
+      from: 1
+      to: 30
