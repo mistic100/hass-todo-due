@@ -20,7 +20,7 @@ This allows sentences like:
 - "Remind hairdresser next tuesday at 9 AM"
 - "Remind me to clean the bathroom in 2 hours"
 
-Not all inputs are required, the intent will try to naturally set the best due date depending one what is provided and the current time.
+Not all inputs are required, the intent will try to naturally set the best due date depending on what is provided and the current time.
 For example "Add xxx at 6 PM" when the current time is 8 PM, will automatically set the item for the next day.
 
 ---
@@ -38,7 +38,7 @@ This integration is best installed via the [Home Assistant Community Store (HACS
     * Select the category **Integration** and click **Add**.
       
 2. **Install the Integration**:
-    * In HACS, search for "CodeMirror" and click **Download**.
+    * In HACS, search for "Todo Due" and click **Download**.
     * Follow the prompts to complete the download.
   
 3. **Add the Integration**:
@@ -49,6 +49,7 @@ This integration is best installed via the [Home Assistant Community Store (HACS
     * Go to **Settings > System** and click the **Restart** button.
 
 ### Manual Installation
+
 1. Download the latest release from the [releases page](https://github.com/mistic100/hass-todo-due/releases)
 2. Extract the `todo_due` folder to your `custom_components` directory
 3. Add `toto_due:` at the root level of your `configuration.yaml` file
