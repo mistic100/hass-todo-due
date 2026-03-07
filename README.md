@@ -23,23 +23,18 @@ This allows sentences like:
 Not all inputs are required, the intent will try to naturally set the best due date depending on what is provided and the current time.
 For example "Add xxx at 6 PM" when the current time is 8 PM, will automatically set the item for the next day.
 
----
 
 ## Installation
 
-This integration is best installed via the [Home Assistant Community Store (HACS)](https://hacs.xyz/).
+### HACS
 
-### HACS (Recommended)
+The integration is available in [HACS](https://hacs.xyz/).
 
-1. **Add the Custom Repository**:
-    * Ensure HACS is installed.
-    * Go to **HACS > Integrations > ... (three dots) > Custom repositories**.
-    * Add this repository's URL: `https://github.com/mistic100/hass-todo-due`
-    * Select the category **Integration** and click **Add**.
-      
-2. **Install the Integration**:
-    * In HACS, search for "Todo Due" and click **Download**.
-    * Follow the prompts to complete the download.
+1. **Install the Integration**:
+
+    Simply click on the button to open the repository in HACS or search for "Todo Due" and download it through the UI.
+
+    [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=mistic100&repository=hass-todo-due&category=integration)
   
 3. **Add the Integration**:
     * Open your `configuration.yaml` file
@@ -48,14 +43,13 @@ This integration is best installed via the [Home Assistant Community Store (HACS
 4. **Restart Home Assistant**:
     * Go to **Settings > System** and click the **Restart** button.
 
-### Manual Installation
+### Manual
 
 1. Download the latest release from the [releases page](https://github.com/mistic100/hass-todo-due/releases)
 2. Extract the `todo_due` folder to your `custom_components` directory
 3. Add `toto_due:` at the root level of your `configuration.yaml` file
 4. Restart Home Assistant
 
----
 
 ## Sentences
 
@@ -63,7 +57,6 @@ Some English and French sentences examples are provided in the [`custom_sentence
 
 In these examples the name of the todo-list is hardcoded in `slots.name` in order to have a simpler syntax.
 
----
 
 ## License
 
