@@ -4,8 +4,15 @@ This custom component for Home Assistant adds support for the `due_date` and `du
 
 It adds a new `TodoDueAddItem` intent that can be called with the same `name` and `item` inputs as the core `HassListAddItem` but with additional inputs.
 
-In "absolute" mode:
+In "absolute time" mode:
 - `due_day` : one of `today`, `tomorrow`, `mon`, `tue`, `wed`, `thu`, `fri`, `sat`, `sun`
+- `due_hour` : between 0 and 23
+- `due_minute` : between 0 and 59
+- `mode` : one of `h24` (default), `am`, `pm`
+
+In "absolute date" mode:
+- `due_date` : between 1 and 28-31
+- `due_month` : one of `january`, `february`, etc.
 - `due_hour` : between 0 and 23
 - `due_minute` : between 0 and 59
 - `mode` : one of `h24` (default), `am`, `pm`
@@ -19,6 +26,7 @@ This allows sentences like:
 - "Remind me to buy bread for tomorrow"
 - "Remind hairdresser next tuesday at 9 AM"
 - "Remind me to clean the bathroom in 2 hours"
+- "Remind me to call John on March 15th"
 
 Not all inputs are required, the intent will try to naturally set the best due date depending on what is provided and the current time.
 For example "Add xxx at 6 PM" when the current time is 8 PM, will automatically set the item for the next day.
@@ -38,7 +46,7 @@ The integration is available in [HACS](https://hacs.xyz/).
   
 3. **Add the Integration**:
     * Open your `configuration.yaml` file
-    * Add `toto_due:` at the root level
+    * Add `todo_due:` at the root level
 
 4. **Restart Home Assistant**:
     * Go to **Settings > System** and click the **Restart** button.
@@ -47,7 +55,7 @@ The integration is available in [HACS](https://hacs.xyz/).
 
 1. Download the latest release from the [releases page](https://github.com/mistic100/hass-todo-due/releases)
 2. Extract the `todo_due` folder to your `custom_components` directory
-3. Add `toto_due:` at the root level of your `configuration.yaml` file
+3. Add `todo_due:` at the root level of your `configuration.yaml` file
 4. Restart Home Assistant
 
 

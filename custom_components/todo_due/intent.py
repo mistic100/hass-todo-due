@@ -1,7 +1,5 @@
 """The todo_due intent handlers."""
 
-from __future__ import annotations
-
 import datetime
 import logging
 from typing import Any
@@ -10,10 +8,9 @@ import voluptuous as vol
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv, intent
 from homeassistant.components.todo import TodoItem, TodoItemStatus, TodoListEntity, DATA_COMPONENT, DOMAIN as TODO_DOMAIN
-# from homeassistant.components.todo.intent import ListBaseIntentHandler
 
-from .utils import get_absolute_due_date, get_relative_due_date
-from .consts import TodoItemDueDay, TodoItemDueMode, DOMAIN
+from .utils import get_absolute_due_date, get_relative_due_date, get_absolute_due_date2
+from .consts import TodoItemDueDay, TodoItemDueMode, TodoItemDueMonth, DOMAIN
 
 
 LOGGER = logging.getLogger("todo_due")
@@ -39,13 +36,14 @@ class TodoDueAddItem(intent.IntentHandler):
         vol.Optional("due_day"): vol.In([d.value for d in TodoItemDueDay]),
         vol.Optional("due_hour"): cv.positive_int,
         vol.Optional("due_minute"): cv.positive_int,
+        vol.Optional("due_date"): cv.positive_int,
+        vol.Optional("due_month"): vol.In([d.value for d in TodoItemDueMonth]),
         # relative due datetime
         vol.Optional("due_day_offset"): cv.positive_int,
         vol.Optional("due_hour_offset"): cv.positive_int,
         vol.Optional("due_minute_offset"): cv.positive_int,
     }
 
-    # FIXME : use ListBaseIntentHandler from todo component once released
     async def async_handle(self, intent_obj: intent.Intent) -> intent.IntentResponse:
         """Handle the intent."""
         hass = intent_obj.hass
@@ -113,6 +111,12 @@ class TodoDueAddItem(intent.IntentHandler):
         due_minute: int | None = None
         if "due_minute" in slots:
             due_minute = slots["due_minute"]["value"]
+        due_date: int | None = None
+        if "due_date" in slots:
+            due_date = slots["due_date"]["value"]
+        due_month: TodoItemDueMonth | None = None
+        if "due_month" in slots:
+            due_month = slots["due_month"]["value"]
         due_day_offset: int | None = None
         if "due_day_offset" in slots:
             due_day_offset = slots["due_day_offset"]["value"]
@@ -125,7 +129,16 @@ class TodoDueAddItem(intent.IntentHandler):
 
         # Compute due date
         due: datetime.date | datetime.datetime | None = None
-        if due_day is not None or due_hour is not None:
+        if due_date is not None:
+            due = get_absolute_due_date2(
+                hass.config.time_zone,
+                mode,
+                due_date,
+                due_month,
+                due_hour,
+                due_minute,
+            )
+        elif due_day is not None or due_hour is not None:
             due = get_absolute_due_date(
                 hass.config.time_zone,
                 mode,

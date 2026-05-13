@@ -11,6 +11,10 @@ intents:
           - <rappel> [(de |d')]<item> pour {due_day} (à|a) {due_hour}<heure>
           - <rappel> [(de |d')]<item> pour {due_day} (à|a) {due_hour}h{due_minute}
 
+          # Absolute date
+          - <rappel> [(de |d')]<item> le {due_date} {due_month}
+          - <rappel> [(de |d')]<item> le {due_date} {due_month} (à|a) {due_hour}<heure>
+
           # Relative time
           - <rappel> [(de |d')]<item> dans {due_minute_offset}<minute>
           - <rappel> [(de |d')]<item> dans {due_hour_offset}<heure>
@@ -40,9 +44,43 @@ lists:
     range:
       from: 0
       to: 59
+  due_date:
+    range:
+      from: 1
+      to: 31
+  due_month:
+    values:
+      - in: janvier
+        out: january
+      - in: février
+        out: february
+      - in: fevrier
+        out: february
+      - in: mars
+        out: march
+      - in: avril
+        out: april
+      - in: mai
+        out: may
+      - in: juin
+        out: june
+      - in: juillet
+        out: july
+      - in: août
+        out: august
+      - in: aout
+        out: august
+      - in: septembre
+        out: september
+      - in: octobre
+        out: october
+      - in: novembre
+        out: november
+      - in: decembre
+        out: december
   due_day:
     values:
-      - in: maintenant
+      - in: "aujourd'hui"
         out: today
       - in: demain
         out: tomorrow

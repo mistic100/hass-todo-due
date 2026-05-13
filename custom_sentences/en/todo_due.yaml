@@ -16,6 +16,10 @@ intents:
           - Remind [me] [to] <item> at {due_hour}:{due_minute} {mode}
           - Remind [me] [to] <item> for {due_day} at {due_hour} {mode}
           - Remind [me] [to] <item> for {due_day} at {due_hour}:{due_minute} {mode}
+
+          # Absolute date
+          - Remind [me] [to] <item> on {due_month} {due_date}<ordinal>
+          - Remind [me] [to] <item> on {due_month} {due_date}<ordinal> at {due_hour}
           
           # Relative time
           - Remind [me] [to] <item> in {due_minute_offset} (minute|minutes)
@@ -24,6 +28,7 @@ intents:
 
         expansion_rules:
           item: "{todo_list_item:item}"
+          ordinal: "[st|nd|rd|th]"
         slots:
           domain: todo
           name: tasks
@@ -52,6 +57,24 @@ lists:
     range:
       from: 0
       to: 59
+  due_date:
+    range:
+      from: 1
+      to: 31
+  due_month:
+    values:
+      - january
+      - february
+      - march
+      - april
+      - may
+      - june
+      - july
+      - august
+      - september
+      - october
+      - november
+      - december
   due_day:
     values:
       - in: today
