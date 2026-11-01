@@ -1,0 +1,13 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "To-do list due date Assist intent",
+        "description": "Adds support for the `due_date` and `due_datetime` parameters when adding items to a to-do list with Assist (text or voice)."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Already configured. Only a single configuration possible."
+    }
+  }
+}

@@ -1,6 +1,6 @@
-# Home Assistant Todo list due date/time for Assist intents
+# Home Assistant To-do list due date/time for Assist intents
 
-This custom component for Home Assistant adds support for the `due_date` and `due_datetime` parameters when adding items to a todo-list with Assist (text or voice).
+This custom component for Home Assistant adds support for the `due_date` and `due_datetime` parameters when adding items to a to-do list with Assist (text or voice).
 
 It adds a new `TodoDueAddItem` intent that can be called with the same `name` and `item` inputs as the core `HassListAddItem` but with additional inputs.
 
@@ -40,34 +40,40 @@ The integration is available in [HACS](https://hacs.xyz/).
 
 1. **Install the Integration**:
 
-    Simply click on the button to open the repository in HACS or search for "Todo Due" and download it through the UI.
+    Simply click on the button to open the repository in HACS or search for "To-do list due date Assist intent" and download it through the UI.
 
     [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=mistic100&repository=hass-todo-due&category=integration)
-  
-3. **Add the Integration**:
-    * Open your `configuration.yaml` file
-    * Add `todo_due:` at the root level
 
-4. **Restart Home Assistant**:
-    * Go to **Settings > System** and click the **Restart** button.
+2. **Restart Home Assistant**:
+
+    * Go to **Settings > System** and click the **Restart** button
+
+3. **Add the Integration**:
+
+    * Go to **Settings > Devices & Services > Add Integration**
+    * Search for and select **To-do list due date Assist intent**
+
+4. **Configure your custom sentences**:
+
+    * Create a file `custom_sentences/<lang>/todo_due.yaml` in your configuration folder
+    * Follow [the documentation](https://www.home-assistant.io/voice_control/custom_sentences_yaml/)
 
 ### Manual
 
 1. Download the latest release from the [releases page](https://github.com/mistic100/hass-todo-due/releases)
 2. Extract the `todo_due` folder to your `custom_components` directory
-3. Add `todo_due:` at the root level of your `configuration.yaml` file
-4. Restart Home Assistant
+3. Restart Home Assistant
+4. Go to **Settings > Devices & Services > Add Integration** and add **To-do list due date Assist intent**
+5. Configure your custom sentences
 
 
 ## Sentences
 
 Some English and French sentences examples are provided in the [`custom_sentences`](./custom_sentences/) folder but due to the wide variety of usage it is best to [craft your own](https://www.home-assistant.io/voice_control/custom_sentences_yaml/).
 
-In these examples the name of the todo-list is hardcoded in `slots.name` in order to have a simpler syntax.
+In these examples the name of the to-do list is hardcoded in `slots.name` in order to have a simpler syntax.
 
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-  

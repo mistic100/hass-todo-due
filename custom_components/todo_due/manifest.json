@@ -1,8 +1,8 @@
 {
   "domain": "todo_due",
-  "name": "To-do list due",
+  "name": "To-do list due date Assist intent",
   "codeowners": ["@mistic100"],
-  "config_flow": false,
+  "config_flow": true,
   "documentation": "https://github.com/mistic100/hass-todo-due",
   "iot_class": "local_push",
   "issue_tracker": "https://github.com/mistic100/hass-todo-due/issues",
