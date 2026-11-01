@@ -1,6 +1,7 @@
 {
   "domain": "todo_due",
   "name": "To-do list due date Assist intent",
+  "categories": ["productivity_information.calendars_todos"],
   "codeowners": ["@mistic100"],
   "config_flow": true,
   "documentation": "https://github.com/mistic100/hass-todo-due",
