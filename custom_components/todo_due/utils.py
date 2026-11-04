@@ -5,7 +5,7 @@ from __future__ import annotations
 import datetime
 
 from homeassistant.helpers import intent
-from homeassistant.util import dt as dt_util
+from homeassistant.util import dt
 
 from .consts import (
     TodoItemDueDay,
@@ -24,7 +24,7 @@ def get_due_date_by_weekday(
 ) -> datetime.date | datetime.datetime:
     """Gets the due date from the requested day + hour + minute."""
 
-    now = dt_util.now().replace(second=0, microsecond=0)
+    now = dt.now().replace(second=0, microsecond=0)
     due = now
 
     # apply time
@@ -81,7 +81,7 @@ def get_due_date_by_date(
     minute: int | None,
 ) -> datetime.date | datetime.datetime:
     """Gets the due date from the requested date + month + hour + minute."""
-    now = dt_util.now().replace(second=0, microsecond=0)
+    now = dt.now().replace(second=0, microsecond=0)
 
     due_month = ENUM_TO_MONTH[month] if month is not None else now.month
     due_year = now.year
@@ -125,7 +125,7 @@ def get_due_date_by_offset(
 ) -> datetime.date | datetime.datetime:
     """Gets the due date from the requested offsets."""
 
-    now = dt_util.now().replace(second=0, microsecond=0)
+    now = dt.now().replace(second=0, microsecond=0)
     due = now
 
     # apply offsets

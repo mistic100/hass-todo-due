@@ -5,7 +5,9 @@ from __future__ import annotations
 import datetime
 import pytest
 
-import custom_components.todo_due.utils as utils
+from homeassistant.helpers import intent
+from homeassistant.util import dt
+
 from custom_components.todo_due.utils import (
     get_due_date_by_weekday,
     get_due_date_by_date,
@@ -24,7 +26,7 @@ def patch_datetime_now(monkeypatch: pytest.MonkeyPatch):
 
     def _patch(day: int, month: int = 1, year: int = 2025):
         monkeypatch.setattr(
-            utils.dt_util,
+            dt,
             "now",
             lambda: datetime.datetime(year, month, day, 12, 0, 0),
         )
@@ -113,7 +115,7 @@ def test_get_due_date_by_date_invalid_date(
     class InvalidDateError(Exception):
         pass
 
-    monkeypatch.setattr(utils.intent, "IntentHandleError", InvalidDateError)
+    monkeypatch.setattr(intent, "IntentHandleError", InvalidDateError)
     patch_datetime_now(day=now_day, month=now_month, year=now_year)
 
     with pytest.raises(InvalidDateError):
