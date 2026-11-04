@@ -2,6 +2,7 @@ from enum import StrEnum
 
 DOMAIN = "todo_due"
 
+
 class TodoItemDueDay(StrEnum):
     """Day value for todo_due."""
 
@@ -14,6 +15,7 @@ class TodoItemDueDay(StrEnum):
     FRIDAY = "fri"
     SATURDAY = "sat"
     SUNDAY = "sun"
+
 
 class TodoItemDueMonth(StrEnum):
     """Month value for toto_due."""
@@ -49,6 +51,7 @@ ENUM_TO_WEEKDAY = {
     TodoItemDueDay.SATURDAY: 5,
     TodoItemDueDay.SUNDAY: 6,
 }
+
 
 ENUM_TO_MONTH = {
     TodoItemDueMonth.JANUARY: 1,

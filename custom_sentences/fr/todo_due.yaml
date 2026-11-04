@@ -76,6 +76,8 @@ lists:
         out: october
       - in: novembre
         out: november
+      - in: décembre
+        out: december
       - in: decembre
         out: december
   due_day:

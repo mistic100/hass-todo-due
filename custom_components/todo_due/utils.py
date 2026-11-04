@@ -3,14 +3,20 @@
 from __future__ import annotations
 
 import datetime
-import calendar
-from zoneinfo import ZoneInfo
 
-from .consts import TodoItemDueDay, TodoItemDueMode, TodoItemDueMonth, ENUM_TO_WEEKDAY, ENUM_TO_MONTH
-    
+from homeassistant.helpers import intent
+from homeassistant.util import dt as dt_util
 
-def get_absolute_due_date(
-    time_zone: str,
+from .consts import (
+    TodoItemDueDay,
+    TodoItemDueMode,
+    TodoItemDueMonth,
+    ENUM_TO_WEEKDAY,
+    ENUM_TO_MONTH
+)
+
+
+def get_due_date_by_weekday(
     mode: TodoItemDueMode,
     day: TodoItemDueDay | None,
     hour: int | None,
@@ -18,15 +24,15 @@ def get_absolute_due_date(
 ) -> datetime.date | datetime.datetime:
     """Gets the due date from the requested day + hour + minute."""
 
-    now = datetime.datetime.now(ZoneInfo(time_zone))
+    now = dt_util.now().replace(second=0, microsecond=0)
     due = now
 
     # apply time
     if hour is not None:
-        if mode == TodoItemDueMode.PM and hour <= 12:
-            hour += 12
-
-        due = due.replace(hour=hour, minute=minute or 0, second=0, microsecond=0)
+        due = due.replace(
+            hour=_convert_hour(mode, hour),
+            minute=minute or 0,
+        )
 
     # default day is today
     if day is None:
@@ -67,8 +73,7 @@ def get_absolute_due_date(
             return due
 
 
-def get_absolute_due_date2(
-    time_zone: str,
+def get_due_date_by_date(
     mode: TodoItemDueMode,
     date: int,
     month: TodoItemDueMonth | None,
@@ -76,32 +81,36 @@ def get_absolute_due_date2(
     minute: int | None,
 ) -> datetime.date | datetime.datetime:
     """Gets the due date from the requested date + month + hour + minute."""
-    
-    now = datetime.datetime.now(ZoneInfo(time_zone))
-    due = now
+    now = dt_util.now().replace(second=0, microsecond=0)
 
-    # apply time
-    if hour is not None:
-        if mode == TodoItemDueMode.PM and hour <= 12:
-            hour += 12
+    due_month = ENUM_TO_MONTH[month] if month is not None else now.month
+    due_year = now.year
+    due_hour = now.hour if hour is None else _convert_hour(mode, hour)
+    due_minute = now.minute if hour is None else minute or 0
 
-        due = due.replace(hour=hour, minute=minute or 0, second=0, microsecond=0)
+    due = _build_absolute_datetime(
+        now,
+        due_year,
+        due_month,
+        date,
+        due_hour,
+        due_minute
+    )
 
-    # apply date
-    due = due.replace(day=date)
-
-    # apply month
-    if month is not None:
-        due = due.replace(month=ENUM_TO_MONTH[month])
-
-    # the time is passed
+    # Move a past date to the next occurrence.
     if now > due:
-        # month is provided: due is next year
         if month is not None:
-            due = due.replace(year=due.year+1)
-        # due is next month
+            due_year += 1
         else:
-            due = _add_one_month(due)
+            due_year, due_month = _next_month(due_year, due_month)
+        due = _build_absolute_datetime(
+            now,
+            due_year,
+            due_month,
+            date,
+            due_hour,
+            due_minute
+        )
 
     # no time provided: return only the date part
     if hour is None:
@@ -109,16 +118,15 @@ def get_absolute_due_date2(
     return due
 
 
-def get_relative_due_date(
-    time_zone: str,
+def get_due_date_by_offset(
     day_offset: int | None,
     hour_offset: int | None,
     minute_offset: int | None,
 ) -> datetime.date | datetime.datetime:
     """Gets the due date from the requested offsets."""
 
-    now = datetime.datetime.now(ZoneInfo(time_zone))
-    due = now.replace(second=0, microsecond=0)
+    now = dt_util.now().replace(second=0, microsecond=0)
+    due = now
 
     # apply offsets
     if day_offset is not None:
@@ -129,23 +137,50 @@ def get_relative_due_date(
         due += datetime.timedelta(minutes=minute_offset)
 
     # no time provided: return only the date part
-    if day_offset is not None and hour_offset is None and minute_offset is None:
+    if (
+        day_offset is not None
+        and hour_offset is None
+        and minute_offset is None
+    ):
         return due.date()
     return due
 
 
-def _add_one_month(orig_date):
-    """Adds one month to a date."""
+def _convert_hour(mode: TodoItemDueMode, hour: int) -> int:
+    """Convert a 12-hour clock hour to 24-hour time."""
+    if mode == TodoItemDueMode.PM and hour < 12:
+        return hour + 12
+    if mode == TodoItemDueMode.AM and hour == 12:
+        return 0
+    return hour
 
-    # advance year and month by one month
-    new_year = orig_date.year
-    new_month = orig_date.month + 1
-    if new_month > 12:
-        new_year += 1
-        new_month -= 12
 
-    # ensure day is valid
-    last_day_of_month = calendar.monthrange(new_year, new_month)[1]
-    new_day = min(orig_date.day, last_day_of_month)
+def _build_absolute_datetime(
+    now: datetime.datetime,
+    year: int,
+    month: int,
+    day: int,
+    hour: int,
+    minute: int,
+) -> datetime.datetime:
+    """Build a due datetime after validating its calendar date."""
+    try:
+        return now.replace(
+            year=year,
+            month=month,
+            day=day,
+            hour=hour,
+            minute=minute,
+        )
+    except ValueError:
+        raise intent.IntentHandleError(
+            "Supplied date does not exist",
+            "invalid_date",
+        )
 
-    return orig_date.replace(year=new_year, month=new_month, day=new_day)
+
+def _next_month(year: int, month: int) -> tuple[int, int]:
+    """Return the year and month following the given month."""
+    if month == 12:
+        return year + 1, 1
+    return year, month + 1

@@ -5,27 +5,35 @@ from __future__ import annotations
 import datetime
 import pytest
 
-from custom_components.todo_due.utils import get_absolute_due_date, get_relative_due_date, get_absolute_due_date2
-from custom_components.todo_due.consts import TodoItemDueDay, TodoItemDueMode, TodoItemDueMonth
+import custom_components.todo_due.utils as utils
+from custom_components.todo_due.utils import (
+    get_due_date_by_weekday,
+    get_due_date_by_date,
+    get_due_date_by_offset
+)
+from custom_components.todo_due.consts import (
+    TodoItemDueDay,
+    TodoItemDueMode,
+    TodoItemDueMonth
+)
 
 
 @pytest.fixture
-def patch_datetime_now(monkeypatch: pytest.MonkeyPatch, request):
-    """Setup mocked "now" method to datetime module."""
+def patch_datetime_now(monkeypatch: pytest.MonkeyPatch):
+    """Setup mocked Home Assistant local time."""
 
-    def _patch(day: int):
-        class fakedatetime(datetime.datetime):
-            @classmethod
-            def now(cls, tz: str | None):
-                return datetime.datetime(2025, 1, day, 12, 0, 0)
-
-        monkeypatch.setattr(datetime, "datetime", fakedatetime)
+    def _patch(day: int, month: int = 1, year: int = 2025):
+        monkeypatch.setattr(
+            utils.dt_util,
+            "now",
+            lambda: datetime.datetime(year, month, day, 12, 0, 0),
+        )
 
     return _patch
 
 
 @pytest.mark.parametrize(
-    ("mode", "day", "hour", "minute" ,"expected"),
+    ("mode", "day", "hour", "minute", "expected"),
     [
         # now = 2025/01/01 12:00:00 (Wednesday)
         (TodoItemDueMode.H24, TodoItemDueDay.TODAY, None, None, datetime.date(2025, 1, 1)),
@@ -48,22 +56,24 @@ def patch_datetime_now(monkeypatch: pytest.MonkeyPatch, request):
         (TodoItemDueMode.H24, TodoItemDueDay.WEDNESDAY, 15, None, datetime.datetime(2025, 1, 1, 15, 0, 0)),
 
         (TodoItemDueMode.AM, TodoItemDueDay.TOMORROW, 8, None, datetime.datetime(2025, 1, 2, 8, 0, 0)),
+        (TodoItemDueMode.AM, TodoItemDueDay.TOMORROW, 12, None, datetime.datetime(2025, 1, 2, 0, 0, 0)),
+        (TodoItemDueMode.PM, TodoItemDueDay.TOMORROW, 12, None, datetime.datetime(2025, 1, 2, 12, 0, 0)),
         (TodoItemDueMode.PM, TodoItemDueDay.TOMORROW, 8, None, datetime.datetime(2025, 1, 2, 20, 0, 0)),
         (TodoItemDueMode.PM, TodoItemDueDay.TOMORROW, 18, None, datetime.datetime(2025, 1, 2, 18, 0, 0)),
     ],
 )
-def test_get_absolute_due_date(
+def test_get_due_date_by_weekday(
     patch_datetime_now,
     mode, day, hour, minute, expected
 ):
-    """Verify that ``get_absolute_due_date`` returns the calculated date/time."""
-    patch_datetime_now(1)
-    result = get_absolute_due_date("UTC", mode, day, hour, minute)
+    """Verify that ``get_due_date_by_weekday`` returns the calculated date/time."""
+    patch_datetime_now(day=1)
+    result = get_due_date_by_weekday(mode, day, hour, minute)
     assert result == expected
 
 
 @pytest.mark.parametrize(
-    ("date", "month", "hour","expected"),
+    ("date", "month", "hour", "expected"),
     [
         # now = 2025/01/10 12:00:00
         (20, None, None, datetime.date(2025, 1, 20)),
@@ -77,14 +87,37 @@ def test_get_absolute_due_date(
         (10, TodoItemDueMonth.JANUARY, 10, datetime.datetime(2026, 1, 10, 10, 0, 0)),
     ],
 )
-def test_get_absolute_due_date2(
+def test_get_due_date_by_date(
     patch_datetime_now,
     date, month, hour, expected
 ):
-    """Verify that ``get_absolute_due_date2`` returns the calculated date/time."""
-    patch_datetime_now(10)
-    result = get_absolute_due_date2("UTC", TodoItemDueMode.H24, date, month, hour, 0)
+    """Verify that ``get_due_date_by_date`` returns the calculated date/time."""
+    patch_datetime_now(day=10)
+    result = get_due_date_by_date(TodoItemDueMode.H24, date, month, hour, 0)
     assert result == expected
+
+
+@pytest.mark.parametrize(
+    ("now_day", "now_month", "now_year", "date", "month", "hour"),
+    [
+        (1, 1, 2025, 29, TodoItemDueMonth.FEBRUARY, None),
+        (29, 2, 2024, 29, TodoItemDueMonth.FEBRUARY, 10),
+        (1, 1, 2025, 31, TodoItemDueMonth.APRIL, None),
+    ],
+)
+def test_get_due_date_by_date_invalid_date(
+    monkeypatch, patch_datetime_now, now_year, now_month, now_day, date, month, hour
+):
+    """Invalid calendar dates are reported as intent errors."""
+
+    class InvalidDateError(Exception):
+        pass
+
+    monkeypatch.setattr(utils.intent, "IntentHandleError", InvalidDateError)
+    patch_datetime_now(day=now_day, month=now_month, year=now_year)
+
+    with pytest.raises(InvalidDateError):
+        get_due_date_by_date(TodoItemDueMode.H24, date, month, hour, 0)
 
 
 @pytest.mark.parametrize(
@@ -101,11 +134,11 @@ def test_get_absolute_due_date2(
         (3, 5, None, datetime.datetime(2025, 1, 4, 17, 0, 0)),
     ],
 )
-def test_get_relative_due_date(
+def test_get_due_date_by_offset(
     patch_datetime_now,
     day_offset, hour_offset, minute_offset, expected
 ):
-    """Verify that ``get_relative_due_date`` returns the calculated date/time."""
+    """Verify that ``get_due_date_by_offset`` returns the calculated date/time."""
     patch_datetime_now(1)
-    result = get_relative_due_date("UTC", day_offset, hour_offset, minute_offset)
+    result = get_due_date_by_offset(day_offset, hour_offset, minute_offset)
     assert result == expected

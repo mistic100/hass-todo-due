@@ -7,9 +7,19 @@ import voluptuous as vol
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv, intent
-from homeassistant.components.todo import TodoItem, TodoItemStatus, TodoListEntity, DATA_COMPONENT, DOMAIN as TODO_DOMAIN
+from homeassistant.components.todo import (
+    TodoItem,
+    TodoItemStatus,
+    TodoListEntity,
+    DATA_COMPONENT,
+    DOMAIN as TODO_DOMAIN
+)
 
-from .utils import get_absolute_due_date, get_relative_due_date, get_absolute_due_date2
+from .utils import (
+    get_due_date_by_weekday,
+    get_due_date_by_offset,
+    get_due_date_by_date
+)
 from .consts import TodoItemDueDay, TodoItemDueMode, TodoItemDueMonth, DOMAIN
 
 
@@ -24,7 +34,7 @@ async def async_setup_intents(hass: HomeAssistant) -> None:
 class TodoDueAddItem(intent.IntentHandler):
     """Handle TodoDueAddItem intents."""
 
-    intent_type =  "TodoDueAddItem"
+    intent_type = "TodoDueAddItem"
     platforms = {DOMAIN}
     description = "Add item to a todo list."
 
@@ -34,9 +44,15 @@ class TodoDueAddItem(intent.IntentHandler):
         # absolute due datetime
         vol.Optional("mode"): vol.In([d.value for d in TodoItemDueMode]),
         vol.Optional("due_day"): vol.In([d.value for d in TodoItemDueDay]),
-        vol.Optional("due_hour"): cv.positive_int,
-        vol.Optional("due_minute"): cv.positive_int,
-        vol.Optional("due_date"): cv.positive_int,
+        vol.Optional("due_hour"): vol.All(
+            cv.positive_int, vol.Range(min=0, max=23)
+        ),
+        vol.Optional("due_minute"): vol.All(
+            cv.positive_int, vol.Range(min=0, max=59)
+        ),
+        vol.Optional("due_date"): vol.All(
+            cv.positive_int, vol.Range(min=1, max=31)
+        ),
         vol.Optional("due_month"): vol.In([d.value for d in TodoItemDueMonth]),
         # relative due datetime
         vol.Optional("due_day_offset"): cv.positive_int,
@@ -44,7 +60,10 @@ class TodoDueAddItem(intent.IntentHandler):
         vol.Optional("due_minute_offset"): cv.positive_int,
     }
 
-    async def async_handle(self, intent_obj: intent.Intent) -> intent.IntentResponse:
+    async def async_handle(
+        self,
+        intent_obj: intent.Intent
+    ) -> intent.IntentResponse:
         """Handle the intent."""
         hass = intent_obj.hass
 
@@ -56,12 +75,15 @@ class TodoDueAddItem(intent.IntentHandler):
         # Find matching list
         LOGGER.info(f"Search list {list_name}")
         match_constraints = intent.MatchTargetsConstraints(
-            name=list_name, domains=[TODO_DOMAIN], assistant=intent_obj.assistant
+            name=list_name,
+            domains=[TODO_DOMAIN],
+            assistant=intent_obj.assistant
         )
         match_result = intent.async_match_targets(hass, match_constraints)
         if not match_result.is_match:
             raise intent.MatchFailedError(
-                result=match_result, constraints=match_constraints
+                result=match_result,
+                constraints=match_constraints
             )
 
         target_list = hass.data[DATA_COMPONENT].get_entity(
@@ -95,8 +117,6 @@ class TodoDueAddItem(intent.IntentHandler):
         intent_obj: intent.Intent,
     ) -> None:
         """Execute action specific to this intent handler."""
-        hass = intent_obj.hass
-
         item = slots["item"]["value"].strip()
 
         mode: TodoItemDueMode = TodoItemDueMode.H24
@@ -130,8 +150,7 @@ class TodoDueAddItem(intent.IntentHandler):
         # Compute due date
         due: datetime.date | datetime.datetime | None = None
         if due_date is not None:
-            due = get_absolute_due_date2(
-                hass.config.time_zone,
+            due = get_due_date_by_date(
                 mode,
                 due_date,
                 due_month,
@@ -139,8 +158,7 @@ class TodoDueAddItem(intent.IntentHandler):
                 due_minute,
             )
         elif due_day is not None or due_hour is not None:
-            due = get_absolute_due_date(
-                hass.config.time_zone,
+            due = get_due_date_by_weekday(
                 mode,
                 due_day,
                 due_hour,
@@ -151,8 +169,7 @@ class TodoDueAddItem(intent.IntentHandler):
             or due_hour_offset is not None
             or due_minute_offset is not None
         ):
-            due = get_relative_due_date(
-                hass.config.time_zone,
+            due = get_due_date_by_offset(
                 due_day_offset,
                 due_hour_offset,
                 due_minute_offset,
