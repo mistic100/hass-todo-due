@@ -34,26 +34,15 @@ For example "Add xxx at 6 PM" when the current time is 8 PM, will automatically 
 
 ## Installation
 
-### HACS
+### Marketplace
 
-The integration is available in [HACS](https://hacs.xyz/).
+The integration is available in Home Assistant Marketplace.
 
 1. **Install the Integration**:
 
-    Simply click on the button to open the repository in HACS or search for "To-do list due date Assist intent" and download it through the UI.
+    [![Open your Home Assistant instance and browse the Marketplace.](https://my.home-assistant.io/badges/marketplace_browse.svg)](https://my.home-assistant.io/redirect/marketplace_browse/?search=To-do+list+due+date+Assist+intent)
 
-    [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=mistic100&repository=hass-todo-due&category=integration)
-
-2. **Restart Home Assistant**:
-
-    * Go to **Settings > System** and click the **Restart** button
-
-3. **Add the Integration**:
-
-    * Go to **Settings > Devices & Services > Add Integration**
-    * Search for and select **To-do list due date Assist intent**
-
-4. **Configure your custom sentences**:
+2. **Configure your custom sentences**:
 
     * Create a file `custom_sentences/<lang>/todo_due.yaml` in your configuration folder
     * Follow [the documentation](https://www.home-assistant.io/voice_control/custom_sentences_yaml/)
